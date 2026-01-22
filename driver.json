@@ -1,0 +1,38 @@
+{
+  "driver_id": "octoprint",
+  "version": "1.0.0",
+  "min_core_api": "0.22.0",
+  "name": {
+    "en": "OctoPrint"
+  },
+  "icon": "uc:printer",
+  "description": {
+    "en": "Integration for OctoPrint 3D printer management"
+  },
+  "developer": {
+    "name": "Meir Miyara",
+    "email": "meir.miyara@gmail.com"
+  },
+  "home_page": "https://github.com/mase1981/uc-intg-octoprint",
+  "release_date": "2026-01-22",
+  "setup_data_schema": {
+    "title": {
+      "en": "OctoPrint Setup"
+    },
+    "settings": [
+      {
+        "id": "info",
+        "label": {
+          "en": "Setup Information"
+        },
+        "field": {
+          "label": {
+            "value": {
+              "en": "Enter your OctoPrint server connection details. API key can be found in OctoPrint Settings → API."
+            }
+          }
+        }
+      }
+    ]
+  }
+}
