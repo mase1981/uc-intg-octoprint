@@ -19,7 +19,7 @@ Control your OctoPrint 3D printer directly from your Unfolded Circle Remote 2 or
 This integration provides comprehensive control of OctoPrint 3D printers through the native REST API, delivering seamless integration with your Unfolded Circle Remote for complete 3D printing control.
 
 ---
-## 💰 Support Development
+## ❤️ Support Development ❤️
 
 If you find this integration useful, consider supporting development:
 
