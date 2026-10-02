@@ -100,9 +100,28 @@ class OctoPrintRemote(Remote):
     async def handle_command(
         self, entity: Remote, cmd_id: str, params: dict[str, Any] | None
     ) -> StatusCodes:
-        """Handle remote commands."""
-        _LOG.info("[%s] Remote command: %s %s", self.id, cmd_id, params or "")
+        """Handle remote commands.
 
+        The Remote sends simple commands (UI page buttons, activities) as
+        ``send_cmd`` with the command name in ``params["command"]``, and lists of
+        them as ``send_cmd_sequence``.
+        """
+        _LOG.info("[%s] Remote command: %s %s", self.id, cmd_id, params or "")
+        params = params or {}
+
+        if cmd_id == Commands.SEND_CMD:
+            return await self._run_command(str(params.get("command", "")))
+        if cmd_id == Commands.SEND_CMD_SEQUENCE:
+            result = StatusCodes.OK
+            for command in params.get("sequence", []) or []:
+                status = await self._run_command(str(command))
+                if status != StatusCodes.OK:
+                    result = status
+            return result
+        return await self._run_command(cmd_id)
+
+    async def _run_command(self, cmd_id: str) -> StatusCodes:
+        """Run one simple command."""
         try:
             if cmd_id == "PAUSE":
                 success = await self._device.pause_job()

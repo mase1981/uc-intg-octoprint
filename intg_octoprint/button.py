@@ -8,7 +8,7 @@ OctoPrint Button entities.
 import logging
 from typing import Any
 from ucapi import StatusCodes
-from ucapi.button import Button, Attributes
+from ucapi.button import Button
 from intg_octoprint.config import OctoPrintConfig
 from intg_octoprint.device import OctoPrintDevice
 
@@ -28,8 +28,6 @@ class OctoPrintPauseButton(Button):
         super().__init__(
             entity_id,
             f"{device_config.name} Pause",
-            [],
-            {Attributes.STATE: "UNAVAILABLE"},
             cmd_handler=self.handle_command,
         )
 
@@ -59,8 +57,6 @@ class OctoPrintResumeButton(Button):
         super().__init__(
             entity_id,
             f"{device_config.name} Resume",
-            [],
-            {Attributes.STATE: "UNAVAILABLE"},
             cmd_handler=self.handle_command,
         )
 
@@ -90,8 +86,6 @@ class OctoPrintStopButton(Button):
         super().__init__(
             entity_id,
             f"{device_config.name} Stop",
-            [],
-            {Attributes.STATE: "UNAVAILABLE"},
             cmd_handler=self.handle_command,
         )
 
@@ -121,8 +115,6 @@ class OctoPrintHomeButton(Button):
         super().__init__(
             entity_id,
             f"{device_config.name} Home",
-            [],
-            {Attributes.STATE: "UNAVAILABLE"},
             cmd_handler=self.handle_command,
         )
 
@@ -152,8 +144,6 @@ class OctoPrintConnectButton(Button):
         super().__init__(
             entity_id,
             f"{device_config.name} Connect",
-            [],
-            {Attributes.STATE: "UNAVAILABLE"},
             cmd_handler=self.handle_command,
         )
 
@@ -183,8 +173,6 @@ class OctoPrintDisconnectButton(Button):
         super().__init__(
             entity_id,
             f"{device_config.name} Disconnect",
-            [],
-            {Attributes.STATE: "UNAVAILABLE"},
             cmd_handler=self.handle_command,
         )
 

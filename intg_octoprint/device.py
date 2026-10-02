@@ -29,6 +29,7 @@ class OctoPrintDevice(PollingDevice):
         self._printer_state: dict[str, Any] | None = None
         self._job_state: dict[str, Any] | None = None
         self._version: dict[str, Any] | None = None
+        self._reachable: bool = False
 
     def _build_base_url(self) -> str:
         """Build the base URL for OctoPrint API."""
@@ -53,6 +54,32 @@ class OctoPrintDevice(PollingDevice):
     @property
     def log_id(self) -> str:
         return f"{self.name} ({self.address})"
+
+    async def establish_connection(self) -> None:
+        """Framework hook: connect, but never fail.
+
+        The framework does not retry a failed connect, so an OctoPrint server
+        that is off when the Remote connects would never be picked up. Polling
+        keeps running and reconnects once the server is reachable.
+        """
+        self._reachable = await self._connect()
+        if not self._reachable:
+            _LOG.warning("[%s] OctoPrint unreachable, will keep retrying", self.log_id)
+
+    async def poll_device(self) -> None:
+        """Framework hook: reconnect if needed, then refresh state."""
+        if not self._reachable:
+            self._reachable = await self._connect()
+            if not self._reachable:
+                self._emit_update()
+                return
+        await self._poll()
+
+    async def disconnect(self) -> None:
+        """Stop polling and close the HTTP session."""
+        await super().disconnect()
+        await self._disconnect()
+        self._reachable = False
 
     async def _connect(self) -> bool:
         """Establish connection to OctoPrint."""
@@ -140,8 +167,12 @@ class OctoPrintDevice(PollingDevice):
 
         except asyncio.TimeoutError:
             _LOG.warning("[%s] Poll timeout", self.log_id)
+            self._reachable = False
+            self._emit_update()
         except Exception as err:
             _LOG.error("[%s] Poll error: %s", self.log_id, err)
+            self._reachable = False
+            self._emit_update()
 
     def _emit_update(self) -> None:
         """Emit entity update events for all entities."""
@@ -160,12 +191,12 @@ class OctoPrintDevice(PollingDevice):
         sensor_file_id = f"sensor.{self.identifier}_file"
         sensor_connection_id = f"sensor.{self.identifier}_connection"
 
-        if not self.is_connected:
+        if not self.is_connected or not self._reachable:
             self.events.emit(
                 DeviceEvents.UPDATE,
                 sensor_connection_id,
                 {
-                    SensorAttributes.STATE: "Disconnected",
+                    SensorAttributes.STATE: "ON",
                     SensorAttributes.VALUE: "disconnected",
                 }
             )
@@ -212,7 +243,7 @@ class OctoPrintDevice(PollingDevice):
             DeviceEvents.UPDATE,
             sensor_connection_id,
             {
-                SensorAttributes.STATE: "Connected",
+                SensorAttributes.STATE: "ON",
                 SensorAttributes.VALUE: "connected",
             }
         )
@@ -221,8 +252,8 @@ class OctoPrintDevice(PollingDevice):
             DeviceEvents.UPDATE,
             sensor_status_id,
             {
-                SensorAttributes.STATE: printer_state_text,
-                SensorAttributes.VALUE: printer_state_text.lower().replace(" ", "_"),
+                SensorAttributes.STATE: "ON",
+                SensorAttributes.VALUE: printer_state_text,
             }
         )
 
@@ -230,7 +261,7 @@ class OctoPrintDevice(PollingDevice):
             DeviceEvents.UPDATE,
             sensor_progress_id,
             {
-                SensorAttributes.STATE: f"{progress}%",
+                SensorAttributes.STATE: "ON",
                 SensorAttributes.VALUE: progress,
             }
         )
@@ -240,7 +271,7 @@ class OctoPrintDevice(PollingDevice):
                 DeviceEvents.UPDATE,
                 sensor_time_remaining_id,
                 {
-                    SensorAttributes.STATE: time_remaining,
+                    SensorAttributes.STATE: "ON",
                     SensorAttributes.VALUE: time_remaining,
                 }
             )
@@ -250,7 +281,7 @@ class OctoPrintDevice(PollingDevice):
                 DeviceEvents.UPDATE,
                 sensor_file_id,
                 {
-                    SensorAttributes.STATE: file_name,
+                    SensorAttributes.STATE: "ON",
                     SensorAttributes.VALUE: file_name,
                 }
             )

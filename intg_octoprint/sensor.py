@@ -28,7 +28,7 @@ class OctoPrintStatusSensor(Sensor):
             f"{device_config.name} Status",
             [],
             {
-                Attributes.STATE: "Unknown",
+                Attributes.STATE: "UNKNOWN",
                 Attributes.VALUE: None,
                 Attributes.UNIT: None,
             },
@@ -50,7 +50,7 @@ class OctoPrintProgressSensor(Sensor):
             f"{device_config.name} Progress",
             [],
             {
-                Attributes.STATE: "0%",
+                Attributes.STATE: "UNKNOWN",
                 Attributes.VALUE: 0,
                 Attributes.UNIT: "%",
             },
@@ -72,7 +72,7 @@ class OctoPrintTimeRemainingSensor(Sensor):
             f"{device_config.name} Time Remaining",
             [],
             {
-                Attributes.STATE: "Unknown",
+                Attributes.STATE: "UNKNOWN",
                 Attributes.VALUE: None,
                 Attributes.UNIT: None,
             },
@@ -94,7 +94,7 @@ class OctoPrintFileSensor(Sensor):
             f"{device_config.name} File",
             [],
             {
-                Attributes.STATE: "No File",
+                Attributes.STATE: "UNKNOWN",
                 Attributes.VALUE: None,
                 Attributes.UNIT: None,
             },
@@ -116,7 +116,7 @@ class OctoPrintConnectionSensor(Sensor):
             f"{device_config.name} Connection",
             [],
             {
-                Attributes.STATE: "Disconnected",
+                Attributes.STATE: "UNKNOWN",
                 Attributes.VALUE: "disconnected",
                 Attributes.UNIT: None,
             },

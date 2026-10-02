@@ -6,7 +6,9 @@ OctoPrint driver for Unfolded Circle Remote.
 """
 
 import logging
-from ucapi import Entity
+from typing import Any
+
+from ucapi import Entity, button
 from ucapi_framework import BaseIntegrationDriver
 from intg_octoprint.config import OctoPrintConfig
 from intg_octoprint.device import OctoPrintDevice
@@ -28,6 +30,21 @@ from intg_octoprint.sensor import (
 )
 
 _LOG = logging.getLogger(__name__)
+
+# Entity IDs are "<type>.<device id>_<suffix>" (remote: "remote.<device id>").
+_ENTITY_SUFFIXES = (
+    "_time_remaining",
+    "_connection",
+    "_disconnect",
+    "_progress",
+    "_connect",
+    "_status",
+    "_resume",
+    "_pause",
+    "_stop",
+    "_home",
+    "_file",
+)
 
 
 class OctoPrintDriver(BaseIntegrationDriver[OctoPrintDevice, OctoPrintConfig]):
@@ -52,6 +69,30 @@ class OctoPrintDriver(BaseIntegrationDriver[OctoPrintDevice, OctoPrintConfig]):
             ],
             driver_id="octoprint",
         )
+
+    def map_device_state(self, device_state: Any) -> Any:
+        """Keep button states intact.
+
+        The framework maps entity states through the media player state set,
+        which turns the button state AVAILABLE into UNKNOWN.
+        """
+        if str(device_state) in (button.States.AVAILABLE.value, button.States.UNAVAILABLE.value):
+            return button.States(str(device_state))
+        return super().map_device_state(device_state)
+
+    def device_from_entity_id(self, entity_id: str) -> str | None:
+        """Return the device identifier for an entity ID.
+
+        The framework default takes the part after the first "." as the device,
+        which for "button.<device id>_pause" would include the suffix.
+        """
+        if not entity_id or "." not in entity_id:
+            return None
+        rest = entity_id.split(".", 1)[1]
+        for suffix in _ENTITY_SUFFIXES:
+            if rest.endswith(suffix):
+                return rest[: -len(suffix)]
+        return rest
 
     def create_entities(
         self, device_config: OctoPrintConfig, device: OctoPrintDevice

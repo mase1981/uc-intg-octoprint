@@ -96,11 +96,13 @@ class OctoPrintSetupFlow(BaseSetupFlow[OctoPrintConfig]):
             )
 
             test_device = OctoPrintDevice(test_config)
-            connected = await asyncio.wait_for(
-                test_device.connect(),
-                timeout=10.0
-            )
-            await test_device.disconnect()
+            try:
+                connected = await asyncio.wait_for(
+                    test_device._connect(),  # pylint: disable=protected-access
+                    timeout=10.0
+                )
+            finally:
+                await test_device._disconnect()  # pylint: disable=protected-access
 
             if not connected:
                 raise ValueError(f"Failed to connect to OctoPrint at {host}:{port}")

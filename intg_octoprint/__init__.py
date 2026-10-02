@@ -57,7 +57,7 @@ async def main():
         driver_path = os.path.join(os.path.dirname(__file__), "..", "driver.json")
         await driver.api.init(os.path.abspath(driver_path), setup_handler)
 
-        await driver.register_all_configured_devices(connect=False)
+        await driver.register_all_device_instances(connect=False)
 
         device_count = len(list(config_manager.all()))
         if device_count > 0:
